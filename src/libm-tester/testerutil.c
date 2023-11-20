@@ -289,7 +289,6 @@ double countULP2sp(float d, mpfr_t c0) {
 
 //
 
-#if MPFR_VERSION < MPFR_VERSION_NUM(4,2,0)
 void mpfr_sinpi(mpfr_t ret, mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_t frpi, frd;
   mpfr_inits(frpi, frd, NULL);
@@ -315,7 +314,6 @@ void mpfr_cospi(mpfr_t ret, mpfr_t arg, mpfr_rnd_t rnd) {
 
   mpfr_clears(frpi, frd, NULL);
 }
-#endif // MPFR_VERSION < MPFR_VERSION_NUM(4,2,0)
 
 void mpfr_lgamma_nosign(mpfr_t ret, mpfr_t arg, mpfr_rnd_t rnd) {
   int s;

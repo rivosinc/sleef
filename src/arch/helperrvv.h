@@ -10,21 +10,40 @@
 #endif
 #endif // #if !defined(SLEEF_GENHEADER)
 
-#if CONFIG == 1
+#if CONFIG == 1 || CONFIG == 2
 #define ISANAME "RISC-V Vector Extension with Min. VLEN"
-#define SLEEF_RVV_VLEN __riscv_v_min_vlen
+#define SLEEF_RVV_VLEN __riscv_vlenb()
+#elif CONFIG == 7
+// 128-bit vector length
+#define ISANAME "RISC-V Vector Extension 128-bit"
+#define SLEEF_RVV_VLEN ((1 << 7) / 8)
+#elif CONFIG == 8
+// 256-bit vector length
+#define ISANAME "RISC-V Vector Extension 256-bit"
+#define SLEEF_RVV_VLEN ((1 << 8) / 8)
+#elif CONFIG == 9
+// 512-bit vector length
+#define ISANAME "RISC-V Vector Extension 512-bit"
+#define SLEEF_RVV_VLEN ((1 << 9) / 8)
+#elif CONFIG == 10
+// 1024-bit vector length
+#define ISANAME "RISC-V Vector Extension 1024-bit"
+#define SLEEF_RVV_VLEN ((1 << 10) / 8)
+#elif CONFIG == 11
+// 2048-bit vector length
+#define ISANAME "RISC-V Vector Extension 2048-bit"
+#define SLEEF_RVV_VLEN ((1 << 11) / 8)
 #else
-#define ISANAME "RISC-V Vector Extension VLEN=2^"#CONFIG
-#define SLEEF_RVV_VLEN (1 << CONFIG)
-#endif
-
-#ifndef CONFIG
-#error CONFIG macro not defined
+#error CONFIG macro invalid or not defined
 #endif
 
 #define ENABLE_SP
-#define ENABLE_FMA_DP
 #define ENABLE_DP
+
+#if CONFIG != 2
+#define ENABLE_FMA_SP
+#define ENABLE_FMA_DP
+#endif
 
 static INLINE int vavailability_i(int name) { return -1; }
 
@@ -45,23 +64,27 @@ static INLINE int vavailability_i(int name) { return -1; }
 
 #ifdef ENABLE_RVV_SP
 // Types that conflict with ENABLE_RVV_DP
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
 typedef vuint64m2_t vmask;
 typedef vbool32_t vopmask;
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
 typedef vuint64m4_t vmask;
 typedef vbool16_t vopmask;
+#else
+#error "unknown rvv lmul"
 #endif
 #endif
 
 #ifdef ENABLE_RVV_DP
 // Types that conflict with ENABLE_RVV_SP
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
 typedef vuint64m1_t vmask;
 typedef vbool64_t vopmask;
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
 typedef vuint64m2_t vmask;
 typedef vbool32_t vopmask;
+#else
+#error "unknown rvv lmul"
 #endif
 #endif
 
@@ -73,7 +96,7 @@ typedef vbool32_t vopmask;
 // wide-LMUL register group. In the largest cases (ddi_t and ddf_t), this
 // requires LMUL=8 if the base type (vfloat or vdouble) has LMUL=2, meaning
 // LMUL=2 is currently the widest option for SLEEF function argument types.
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
 
 typedef vint32mf2_t vint;
 typedef vfloat64m1_t vdouble;
@@ -91,8 +114,8 @@ typedef vint32m2_t fi_t;
 typedef vint32m4_t dfi_t;
 #define SLEEF_RVV_SP_LMUL 1
 #define SLEEF_RVV_DP_LMUL 1
-#define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / 32)
-#define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / 64)
+#define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
+#define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m1
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m1
 #define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m1
@@ -117,6 +140,9 @@ typedef vint32m4_t dfi_t;
 #define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m2
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m1
+#define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m1_rm
+#define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m1
+#define SLEEF_RVV_SP_VFCVT_X_F_VF_RM __riscv_vfcvt_x_f_v_i32m1_rm
 #define SLEEF_RVV_DP_VCAST_VD_D __riscv_vfmv_v_f_f64m1
 #define SLEEF_RVV_DP_VCAST_VD_VI(x) __riscv_vfwcvt_f(x, VECTLENDP)
 #define SLEEF_RVV_DP_VCAST_VI_I __riscv_vmv_v_x_i32mf2
@@ -155,8 +181,11 @@ typedef vint32m4_t dfi_t;
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m1
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32mf2
+#define SLEEF_RVV_DP_VFNCVT_X_F_VI __riscv_vfncvt_x_f_w_i32mf2_rm
+#define SLEEF_RVV_DP_VFCVT_F_X_VD __riscv_vfcvt_f_x_v_f64m1
+#define SLEEF_RVV_DP_VFCVT_X_F_VD_RM __riscv_vfcvt_x_f_v_i64m1_rm
 
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
 
 typedef vint32m1_t vint;
 typedef vfloat64m2_t vdouble;
@@ -174,8 +203,8 @@ typedef vint32m4_t fi_t;
 typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_SP_LMUL 2
 #define SLEEF_RVV_DP_LMUL 2
-#define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / 32)
-#define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / 64)
+#define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
+#define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m2
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m2
 #define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m2
@@ -200,6 +229,9 @@ typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m4
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m2
+#define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m2_rm
+#define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m2
+#define SLEEF_RVV_SP_VFCVT_X_F_VF_RM __riscv_vfcvt_x_f_v_i32m2_rm
 #define SLEEF_RVV_DP_VCAST_VD_D __riscv_vfmv_v_f_f64m2
 #define SLEEF_RVV_DP_VCAST_VD_VI(x) __riscv_vfwcvt_f(x, VECTLENDP)
 #define SLEEF_RVV_DP_VCAST_VI_I __riscv_vmv_v_x_i32m1
@@ -238,7 +270,12 @@ typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m2
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32m1
+#define SLEEF_RVV_DP_VFNCVT_X_F_VI __riscv_vfncvt_x_f_w_i32m1_rm
+#define SLEEF_RVV_DP_VFCVT_F_X_VD __riscv_vfcvt_f_x_v_f64m2
+#define SLEEF_RVV_DP_VFCVT_X_F_VD_RM __riscv_vfcvt_x_f_v_i64m2_rm
 
+#else
+#error "unknown rvv lmul"
 #endif // ENABLE_RVVM1
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -319,13 +356,7 @@ static INLINE vfloat vcast_vf_f(float f) {
   return SLEEF_RVV_SP_VCAST_VF_F(f, VECTLENSP);
 }
 static INLINE vfloat vrint_vf_vf(vfloat vd) {
-  // It is not currently possible to safely set frm for intrinsics,
-  // so emulate round-to-nearest behavior
-  vfloat half = SLEEF_RVV_SP_VCAST_VF_F(0.5, VECTLENSP);
-  half = __riscv_vfsgnj(half, vd, VECTLENSP);
-  vfloat res = __riscv_vfadd(vd, half, VECTLENSP);
-  vint2 i = __riscv_vfcvt_rtz_x(res, VECTLENSP);
-  return __riscv_vfcvt_f(i, VECTLENSP);
+  return SLEEF_RVV_SP_VFCVT_F_X_VF(SLEEF_RVV_SP_VFCVT_X_F_VF_RM(vd, __RISCV_FRM_RNE, VECTLENSP), VECTLENSP);
 }
 static INLINE vfloat vcast_vf_vi2(vint2 vi) {
   return __riscv_vfcvt_f(vi, VECTLENSP);
@@ -334,12 +365,7 @@ static INLINE vint2 vcast_vi2_i(int i) {
   return SLEEF_RVV_SP_VCAST_VI2_I(i, VECTLENSP);
 }
 static INLINE vint2 vrint_vi2_vf(vfloat vf) {
-  // It is not currently possible to safely set frm for intrinsics,
-  // so emulate round-to-nearest behavior
-  vfloat half = SLEEF_RVV_SP_VCAST_VF_F(0.5, VECTLENSP);
-  half = __riscv_vfsgnj(half, vf, VECTLENSP);
-  vfloat res = __riscv_vfadd(vf, half, VECTLENSP);
-  return __riscv_vfcvt_rtz_x(res, VECTLENSP);
+  return SLEEF_RVV_SP_VFNCVT_X_F_VI(vf, __RISCV_FRM_RNE, VECTLENSP);
 }
 static INLINE vint2 vtruncate_vi2_vf(vfloat vf) {
   return __riscv_vfcvt_rtz_x(vf, VECTLENSP);
@@ -399,12 +425,32 @@ static INLINE vfloat vrec_vf_vf(vfloat d) {
 static INLINE vfloat vsqrt_vf_vf(vfloat d) {
   return __riscv_vfsqrt(d, VECTLENSP);
 }
-// fused multiply-add/subtract
+#if defined(ENABLE_FMA_SP)
+// Multiply accumulate: z = z + x * y
 static INLINE vfloat vmla_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) {
   return __riscv_vfmadd(x, y, z, VECTLENSP);
 }
+// Multiply subtract: z = z - x * y
 static INLINE vfloat vmlanp_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) {
   return __riscv_vfnmsub(x, y, z, VECTLENSP);
+}
+static INLINE vfloat vmlapn_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) {
+  return __riscv_vfmsub(x, y, z, VECTLENSP);
+}
+#else
+static INLINE vfloat vmla_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { return vadd_vf_vf_vf(vmul_vf_vf_vf(x, y), z); }
+static INLINE vfloat vmlanp_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { return vsub_vf_vf_vf(z, vmul_vf_vf_vf(x, y)); }
+static INLINE vfloat vmlapn_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { return vsub_vf_vf_vf(vmul_vf_vf_vf(x, y), z); }
+#endif
+// fused multiply add / sub
+static INLINE vfloat vfma_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { // (x * y) + z
+  return __riscv_vfmadd(x, y, z, VECTLENSP);
+}
+static INLINE vfloat vfmanp_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { // -(x * y) + z
+  return __riscv_vfnmsub(x, y, z, VECTLENSP);
+}
+static INLINE vfloat vfmapn_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { // (x * y) - z
+  return __riscv_vfmsub(x, y, z, VECTLENSP);
 }
 // sign manipulation
 static INLINE vfloat vmulsign_vf_vf_vf(vfloat x, vfloat y) {
@@ -635,19 +681,23 @@ static INLINE vdouble digetd_vd_di(di_t d) {
   return SLEEF_RVV_DP_VGET_VD(SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(d), 0);
 }
 static INLINE vint digeti_vi_di(di_t d) {
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   return __riscv_vlmul_trunc_i32mf2(SLEEF_RVV_DP_VGET_VI(d, 1));
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   return SLEEF_RVV_DP_VGET_VI(d, 2);
+#else
+#error "unknown rvv lmul"
 #endif
 }
 static INLINE di_t disetdi_di_vd_vi(vdouble d, vint i) {
   di_t res;
   res = SLEEF_RVV_DP_VREINTERPRET_4VI_VD2(__riscv_vset(SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(res), 0, d));
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   res = __riscv_vset(res, 1, __riscv_vlmul_ext_i32m1(i));
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   res = __riscv_vset(res, 2, i);
+#else
+#error "unknown rvv lmul"
 #endif
   return res;
 }
@@ -656,19 +706,23 @@ static INLINE vdouble2 ddigetdd_vd2_ddi(ddi_t d) {
   return SLEEF_RVV_DP_VGET_VD2(SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(d), 0);
 }
 static INLINE vint ddigeti_vi_ddi(ddi_t d) {
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   return __riscv_vlmul_trunc_i32mf2(SLEEF_RVV_DP_VGET_VI(d, 2));
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   return SLEEF_RVV_DP_VGET_VI(d, 4);
+#else
+#error "unknown rvv lmul"
 #endif
 }
 static INLINE ddi_t ddisetddi_ddi_vd2_vi(vdouble2 v, vint i) {
   ddi_t res;
   res = SLEEF_RVV_DP_VREINTERPRET_8VI_4VD(__riscv_vset(SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(res), 0, v));
-#ifdef ENABLE_RVVM1
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   res = __riscv_vset(res, 2, __riscv_vlmul_ext_i32m1(i));
-#else
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   res = __riscv_vset(res, 4, i);
+#else
+#error "unknown rvv lmul"
 #endif
   return res;
 }
@@ -689,20 +743,10 @@ static INLINE vint vcast_vi_i(int32_t i) {
   return SLEEF_RVV_DP_VCAST_VI_I(i, VECTLENDP);
 }
 static INLINE vint vrint_vi_vd(vdouble vd) {
-  // It is not currently possible to safely set frm for intrinsics,
-  // so emulate round-to-nearest behavior
-  vdouble half = SLEEF_RVV_DP_VCAST_VD_D(0.5, VECTLENDP);
-  half = __riscv_vfsgnj(half, vd, VECTLENDP);
-  vdouble res = __riscv_vfadd(vd, half, VECTLENDP);
-  return __riscv_vfncvt_rtz_x(res, VECTLENDP);
+  return SLEEF_RVV_DP_VFNCVT_X_F_VI(vd, __RISCV_FRM_RNE, VECTLENDP);
 }
 static INLINE vdouble vrint_vd_vd(vdouble vd) {
-  // It is not currently possible to safely set frm for intrinsics,
-  // so emulate round-to-nearest behavior
-  vdouble half = SLEEF_RVV_DP_VCAST_VD_D(0.5, VECTLENDP);
-  half = __riscv_vfsgnj(half, vd, VECTLENDP);
-  vdouble res = __riscv_vfadd(vd, half, VECTLENDP);
-  return __riscv_vfwcvt_f(__riscv_vfncvt_rtz_x(res, VECTLENDP), VECTLENDP);
+  return SLEEF_RVV_DP_VFCVT_F_X_VD(SLEEF_RVV_DP_VFCVT_X_F_VD_RM(vd, __RISCV_FRM_RNE, VECTLENDP), VECTLENDP);
 }
 static INLINE vint vtruncate_vi_vd(vdouble vd) {
   return __riscv_vfncvt_rtz_x(vd, VECTLENDP);
@@ -768,13 +812,20 @@ static INLINE vdouble vmax_vd_vd_vd(vdouble x, vdouble y) {
 static INLINE vdouble vmin_vd_vd_vd(vdouble x, vdouble y) {
   return __riscv_vfmin(x, y, VECTLENDP);
 }
-// fused multiply add / sub
+#if defined(ENABLE_FMA_DP)
+// Multiply accumulate: z = z + x * y
 static INLINE vdouble vmla_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   return __riscv_vfmadd(x, y, z, VECTLENDP);
 }
+// Multiply subtract: z = z - x * y
 static INLINE vdouble vmlapn_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   return __riscv_vfmsub(x, y, z, VECTLENDP);
 }
+#else
+static INLINE vdouble vmla_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vadd_vd_vd_vd(vmul_vd_vd_vd(x, y), z); }
+static INLINE vdouble vmlapn_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vsub_vd_vd_vd(vmul_vd_vd_vd(x, y), z); }
+#endif
+// fused multiply add / sub
 static INLINE vdouble vfma_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   return __riscv_vfmadd(x, y, z, VECTLENDP);
 }
