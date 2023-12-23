@@ -37,11 +37,7 @@
 #include "helpersve.h"
 #endif
 
-#ifdef ENABLE_RVVM1
-#include "helperrvv.h"
-#endif
-
-#ifdef ENABLE_RVVM2
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM2)
 #include "helperrvv.h"
 #endif
 
