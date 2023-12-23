@@ -17,35 +17,42 @@
 
 #if CONFIG == 1 || CONFIG == 2
 #define ISANAME "RISC-V Vector Extension with Min. VLEN"
-#define SLEEF_RVV_VLEN __riscv_vlenb()
+#define SLEEF_RVV_VLEN 0
 #elif CONFIG == 7
 // 128-bit vector length
 #define ISANAME "RISC-V Vector Extension 128-bit"
 #define LOG2VECTLENDP 1
 #define SLEEF_RVV_VLEN ((1 << 7) / 8)
+#define DFTPRIORITY 19
 #elif CONFIG == 8
 // 256-bit vector length
 #define ISANAME "RISC-V Vector Extension 256-bit"
 #define LOG2VECTLENDP 2
 #define SLEEF_RVV_VLEN ((1 << 8) / 8)
+#define DFTPRIORITY 20
 #elif CONFIG == 9
 // 512-bit vector length
 #define ISANAME "RISC-V Vector Extension 512-bit"
 #define LOG2VECTLENDP 3
 #define SLEEF_RVV_VLEN ((1 << 9) / 8)
+#define DFTPRIORITY 21
 #elif CONFIG == 10
 // 1024-bit vector length
 #define ISANAME "RISC-V Vector Extension 1024-bit"
 #define LOG2VECTLENDP 4
 #define SLEEF_RVV_VLEN ((1 << 10) / 8)
+#define DFTPRIORITY 22
 #elif CONFIG == 11
 // 2048-bit vector length
 #define ISANAME "RISC-V Vector Extension 2048-bit"
 #define LOG2VECTLENDP 5
 #define SLEEF_RVV_VLEN ((1 << 11) / 8)
+#define DFTPRIORITY 23
 #else
 #error CONFIG macro invalid or not defined
 #endif
+
+#define LOG2VECTLENSP (LOG2VECTLENDP+1)
 
 #define ENABLE_SP
 #define ENABLE_DP
@@ -54,8 +61,6 @@
 #define ENABLE_FMA_SP
 #define ENABLE_FMA_DP
 #endif
-
-static INLINE int vavailability_i(int name) { return -1; }
 
 ////////////////////////////////////////////////////////////////////////////////
 // RISC-V Vector Types
@@ -122,10 +127,23 @@ typedef vfloat32m4_t df2;
 typedef vint32m1_t vint2;
 typedef vint32m2_t fi_t;
 typedef vint32m4_t dfi_t;
+
 #define SLEEF_RVV_SP_LMUL 1
 #define SLEEF_RVV_DP_LMUL 1
+#if SLEEF_RVV_VLEN == 0
+#define VECTLENSP (__riscv_vsetvlmax_e32m1())
+#define VECTLENDP (__riscv_vsetvlmax_e64m1())
+static INLINE int vavailability_i(int name) {
+    (void)__riscv_vsetvlmax_e64m1();  // raise sigill if not supported
+    return 3;
+}
+#else
 #define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
 #define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
+static INLINE int vavailability_i(int name) {
+    return (__riscv_vsetvlmax_e64m1() >= VECTLENDP) ? 3 : 0;
+}
+#endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m1
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m1
 #define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m1
@@ -143,6 +161,10 @@ typedef vint32m4_t dfi_t;
 #define SLEEF_RVV_SP_VGET_VF2 __riscv_vget_f32m2
 #define SLEEF_RVV_SP_VGET_4VF __riscv_vget_f32m4
 #define SLEEF_RVV_SP_VGET_VU2 __riscv_vget_u32m2
+#define SLEEF_RVV_SP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
+#define SLEEF_RVV_SP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m4
+#define SLEEF_RVV_SP_VLMUL_EXT_VF __riscv_vlmul_ext_f32m2
+#define SLEEF_RVV_SP_VLMUL_EXT_VF2 __riscv_vlmul_ext_f32m4
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m1
 #define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m1
 #define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m2
@@ -188,6 +210,8 @@ typedef vint32m4_t dfi_t;
 #define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m1
 #define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m2
 #define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m4
+#define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
+#define SLEEF_RVV_DP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m2
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m1
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32mf2
@@ -213,8 +237,20 @@ typedef vint32m4_t fi_t;
 typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_SP_LMUL 2
 #define SLEEF_RVV_DP_LMUL 2
+#if SLEEF_RVV_VLEN == 0
+#define VECTLENSP (__riscv_vsetvlmax_e32m2())
+#define VECTLENDP (__riscv_vsetvlmax_e64m2())
+static INLINE int vavailability_i(int name) {
+    (void)__riscv_vsetvlmax_e64m2();  // raise sigill if not supported
+    return 3;
+}
+#else
 #define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
 #define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
+static INLINE int vavailability_i(int name) {
+    return (__riscv_vsetvlmax_e64m2() >= VECTLENDP) ? 3 : 0;
+}
+#endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m2
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m2
 #define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m2
@@ -232,6 +268,10 @@ typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_SP_VGET_VF2 __riscv_vget_f32m4
 #define SLEEF_RVV_SP_VGET_4VF __riscv_vget_f32m8
 #define SLEEF_RVV_SP_VGET_VU2 __riscv_vget_u32m4
+#define SLEEF_RVV_SP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m4
+#define SLEEF_RVV_SP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m8
+#define SLEEF_RVV_SP_VLMUL_EXT_VF __riscv_vlmul_ext_f32m4
+#define SLEEF_RVV_SP_VLMUL_EXT_VF2 __riscv_vlmul_ext_f32m8
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m2
 #define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m2
 #define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m4
@@ -277,6 +317,8 @@ typedef vint32m8_t dfi_t;
 #define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m2
 #define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m4
 #define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m8
+#define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
+#define SLEEF_RVV_DP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m4
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m2
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32m1
@@ -304,8 +346,11 @@ static INLINE vfloat figetd_vf_di(fi_t d) {
 static INLINE vint2 figeti_vi2_di(fi_t d) {
   return SLEEF_RVV_SP_VGET_VI2(d, 1);
 }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
 static INLINE fi_t fisetdi_fi_vf_vi2(vfloat d, vint2 i) {
   fi_t res;
+  //res = SLEEF_RVV_SP_VLMUL_EXT_VI2(SLEEF_RVV_SP_VREINTERPRET_VI2(d));
   res = __riscv_vset(res, 0, SLEEF_RVV_SP_VREINTERPRET_VI2(d));
   res = __riscv_vset(res, 1, i);
   return res;
@@ -318,6 +363,7 @@ static INLINE vint2 dfigeti_vi2_dfi(dfi_t d) {
 }
 static INLINE dfi_t dfisetdfi_dfi_vf2_vi2(vfloat2 v, vint2 i) {
   dfi_t res;
+  //res = SLEEF_RVV_SP_VLMUL_EXT_2VI(SLEEF_RVV_SP_VREINTERPRET_2VI(v));
   res = __riscv_vset(res, 0, SLEEF_RVV_SP_VREINTERPRET_2VI(v));
   res = __riscv_vset(res, 2, i);
   return res;
@@ -334,6 +380,7 @@ static INLINE vfloat vf2gety_vf_vf2(vfloat2 v) {
 }
 static INLINE vfloat2 vf2setxy_vf2_vf_vf(vfloat x, vfloat y) {
   vfloat2 res;
+  //res = SLEEF_RVV_SP_VLMUL_EXT_VF(x);
   res = __riscv_vset(res, 0, x);
   res = __riscv_vset(res, 1, y);
   return res;
@@ -347,6 +394,7 @@ static INLINE vfloat2 vf2sety_vf2_vf2_vf(vfloat2 v, vfloat d) {
 // df2 type
 static df2 df2setab_df2_vf2_vf2(vfloat2 a, vfloat2 b) {
   df2 res;
+  //res = SLEEF_RVV_SP_VLMUL_EXT_VF2(a);
   res = __riscv_vset(res, 0, a);
   res = __riscv_vset(res, 1, b);
   return res;
@@ -560,6 +608,17 @@ static INLINE vmask vand_vm_vo32_vm(vopmask x, vmask y) {
 static INLINE vmask vandnot_vm_vo32_vm(vopmask x, vmask y) {
   return __riscv_vmerge(y, 0, x, VECTLENSP);
 }
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+static INLINE vint vcast_vi_vm(vmask vm) {
+    return __riscv_vlmul_trunc_i32mf2(__riscv_vreinterpret_i32m2(__riscv_vreinterpret_i64m2(vm)));
+}
+#else
+static INLINE vint vcast_vi_vm(vmask vm) {
+    return __riscv_vget_i32m1(__riscv_vreinterpret_i32m4(__riscv_vreinterpret_i64m4(vm)), 0);
+}
+#endif
+
+
 
 
 /****************************************/
@@ -980,6 +1039,7 @@ static INLINE vquad vqsetxy_vq_vm_vm(vmask x, vmask y) {
 static INLINE vquad vqsetx_vq_vq_vm(vquad v, vmask x) { return __riscv_vset(v, 0, x); }
 static INLINE vquad vqsety_vq_vq_vm(vquad v, vmask y) { return __riscv_vset(v, 1, y); }
 
+#pragma GCC diagnostic pop
 
 
 /****************************************/
@@ -1080,8 +1140,155 @@ static INLINE vint vand_vi_vo_vi(vopmask x, vint y) {
 /* DFT Operations                       */
 /****************************************/
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 static INLINE vdouble vposneg_vd_vd(vdouble d) {
-  // not implemented
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vbool64_t mask = __riscv_vreinterpret_b64(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
+#endif
+  vdouble nd = __riscv_vfneg(d, VECTLENDP);
+  return __riscv_vmerge(nd, d, mask, VECTLENDP);
 }
+
+static INLINE vdouble vnegpos_vd_vd(vdouble d) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vbool64_t mask = __riscv_vreinterpret_b64(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
+#endif
+  vdouble nd = __riscv_vfneg(d, VECTLENDP);
+  return __riscv_vmerge(nd, d, mask, VECTLENDP);
+}
+
+static INLINE vfloat vposneg_vf_vf(vfloat d) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vbool16_t mask = __riscv_vreinterpret_b16(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
+#endif
+  vfloat nd = __riscv_vfneg(d, VECTLENSP);
+  return __riscv_vmerge(nd, d, mask, VECTLENSP);
+}
+
+static INLINE vfloat vnegpos_vf_vf(vfloat d) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vbool16_t mask = __riscv_vreinterpret_b16(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
+#endif
+  vfloat nd = __riscv_vfneg(d, VECTLENSP);
+  return __riscv_vmerge(nd, d, mask, VECTLENSP);
+}
+
+static INLINE vdouble vsubadd_vd_vd_vd(vdouble x, vdouble y) { return vadd_vd_vd_vd(x, vnegpos_vd_vd(y)); }
+static INLINE vfloat vsubadd_vf_vf_vf(vfloat d0, vfloat d1) { return vadd_vf_vf_vf(d0, vnegpos_vf_vf(d1)); }
+static INLINE vdouble vmlsubadd_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vfma_vd_vd_vd_vd(x, y, vnegpos_vd_vd(z)); }
+static INLINE vfloat vmlsubadd_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { return vfma_vf_vf_vf_vf(x, y, vnegpos_vf_vf(z)); }
+
+//
+
+static INLINE vdouble vrev21_vd_vd(vdouble vd) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vuint64m1_t id = __riscv_vid_v_u64m1(VECTLENDP);
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vuint64m2_t id = __riscv_vid_v_u64m2(VECTLENDP);
+#endif
+  id = __riscv_vxor(id, 1, VECTLENDP);
+  return __riscv_vrgather(vd, id, VECTLENDP);
+}
+
+static INLINE vfloat vrev21_vf_vf(vfloat vf) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vuint32m1_t id = __riscv_vid_v_u32m1(VECTLENSP);
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vuint32m2_t id = __riscv_vid_v_u32m2(VECTLENSP);
+#endif
+  id = __riscv_vxor(id, 1, VECTLENSP);
+  return __riscv_vrgather(vf, id, VECTLENSP);
+}
+
+static INLINE vdouble vreva2_vd_vd(vdouble vd) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vuint64m1_t id = __riscv_vid_v_u64m1(VECTLENDP);
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vuint64m2_t id = __riscv_vid_v_u64m2(VECTLENDP);
+#endif
+  id = __riscv_vxor(id, VECTLENDP - 2, VECTLENDP);
+  return __riscv_vrgather(vd, id, VECTLENDP);
+}
+
+static INLINE vfloat vreva2_vf_vf(vfloat vf) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+  vuint32m1_t id = __riscv_vid_v_u32m1(VECTLENSP);
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+  vuint32m2_t id = __riscv_vid_v_u32m2(VECTLENSP);
+#endif
+  id = __riscv_vxor(id, VECTLENSP - 2, VECTLENSP);
+  return __riscv_vrgather(vf, id, VECTLENSP);
+}
+
+//
+
+static INLINE void vscatter2_v_p_i_i_vd(double *ptr, int offset, int step, vdouble v) {
+  ptr += offset * 2;
+  for (int i = 0; i < VECTLENDP; i += 2) {
+    __riscv_vse64(ptr, v, 2);
+    v = __riscv_vslidedown(v, 2, VECTLENDP);
+    ptr += step * 2;
+  }
+//  svst1_scatter_u64index_f64(ptrue, ptr + offset*2, svzip1_u64(svindex_u64(0, step*2), svindex_u64(1, step*2)), v);
+}
+
+static INLINE void vscatter2_v_p_i_i_vf(float *ptr, int offset, int step, vfloat v) {
+  // TODO: cast to uint64_t and use a single vsse64?
+  ptr += offset * 2;
+  for (int i = 0; i < VECTLENSP; i += 2) {
+    __riscv_vse32(ptr, v, 2);
+    v = __riscv_vslidedown(v, 2, VECTLENSP);
+    ptr += step * 2;
+  }
+//  svst1_scatter_u32index_f32(ptrue, ptr + offset*2, svzip1_u32(svindex_u32(0, step*2), svindex_u32(1, step*2)), v);
+}
+
+static INLINE void vstream_v_p_vd(double *ptr, vdouble v) { vstore_v_p_vd(ptr, v); }
+static INLINE void vstream_v_p_vf(float *ptr, vfloat v) { vstore_v_p_vf(ptr, v); }
+static INLINE void vsscatter2_v_p_i_i_vd(double *ptr, int offset, int step, vdouble v) { vscatter2_v_p_i_i_vd(ptr, offset, step, v); }
+static INLINE void vsscatter2_v_p_i_i_vf(float *ptr, int offset, int step, vfloat v) { vscatter2_v_p_i_i_vf(ptr, offset, step, v); }
+
+// These functions are for debugging
+static double vcast_d_vd(vdouble v) {
+  return __riscv_vfmv_f(v);
+}
+
+static float vcast_f_vf(vfloat v) {
+  return __riscv_vfmv_f(v);
+}
+
+static int vcast_i_vi(vint v) {
+  return __riscv_vmv_x(v);
+}
+
+static int vcast_i_vi2(vint2 v) {
+  return __riscv_vmv_x(v);
+}
+
+//
+
+static vquad loadu_vq_p(const int32_t *ptr) {
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
+    return __riscv_vreinterpret_u64m2(__riscv_vreinterpret_u32m2(__riscv_vle32_v_i32m2(ptr, VECTLENSP * 2)));
+#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+    return __riscv_vreinterpret_u64m4(__riscv_vreinterpret_u32m4(__riscv_vle32_v_i32m4(ptr, VECTLENSP * 2)));
+#endif
+}
+
+static INLINE vquad cast_vq_aq(vargquad aq) { return aq; }
+static INLINE vargquad cast_aq_vq(vquad vq) { return vq; }
+
+#pragma GCC diagnostic pop
+
+static INLINE void vprefetch_v_p(const void *ptr) {}
 
 #endif // HELPERRVV_H
