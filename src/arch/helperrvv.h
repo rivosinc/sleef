@@ -1140,8 +1140,6 @@ static INLINE vint vand_vi_vo_vi(vopmask x, vint y) {
 /* DFT Operations                       */
 /****************************************/
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreturn-type"
 static INLINE vdouble vposneg_vd_vd(vdouble d) {
 #if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   vbool64_t mask = __riscv_vreinterpret_b64(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
@@ -1286,8 +1284,6 @@ static vquad loadu_vq_p(const int32_t *ptr) {
 
 static INLINE vquad cast_vq_aq(vargquad aq) { return aq; }
 static INLINE vargquad cast_aq_vq(vquad vq) { return vq; }
-
-#pragma GCC diagnostic pop
 
 static INLINE void vprefetch_v_p(const void *ptr) {}
 
