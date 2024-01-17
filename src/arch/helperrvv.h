@@ -1232,22 +1232,19 @@ static INLINE vfloat vreva2_vf_vf(vfloat vf) {
 static INLINE void vscatter2_v_p_i_i_vd(double *ptr, int offset, int step, vdouble v) {
   ptr += offset * 2;
   for (int i = 0; i < VECTLENDP; i += 2) {
-    __riscv_vse64(ptr, v, 2);
-    v = __riscv_vslidedown(v, 2, VECTLENDP);
+    vdouble vv = __riscv_vslidedown(v, i, 2);
+    __riscv_vse64(ptr, vv, 2);
     ptr += step * 2;
   }
-//  svst1_scatter_u64index_f64(ptrue, ptr + offset*2, svzip1_u64(svindex_u64(0, step*2), svindex_u64(1, step*2)), v);
 }
 
 static INLINE void vscatter2_v_p_i_i_vf(float *ptr, int offset, int step, vfloat v) {
-  // TODO: cast to uint64_t and use a single vsse64?
   ptr += offset * 2;
   for (int i = 0; i < VECTLENSP; i += 2) {
-    __riscv_vse32(ptr, v, 2);
-    v = __riscv_vslidedown(v, 2, VECTLENSP);
+    vdouble vv = __riscv_vslidedown(v, i, 2);
+    __riscv_vse32(ptr, vv, 2);
     ptr += step * 2;
   }
-//  svst1_scatter_u32index_f32(ptrue, ptr + offset*2, svzip1_u32(svindex_u32(0, step*2), svindex_u32(1, step*2)), v);
 }
 
 static INLINE void vstream_v_p_vd(double *ptr, vdouble v) { vstore_v_p_vd(ptr, v); }
