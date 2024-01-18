@@ -1241,7 +1241,7 @@ static INLINE void vscatter2_v_p_i_i_vd(double *ptr, int offset, int step, vdoub
 static INLINE void vscatter2_v_p_i_i_vf(float *ptr, int offset, int step, vfloat v) {
   ptr += offset * 2;
   for (int i = 0; i < VECTLENSP; i += 2) {
-    vdouble vv = __riscv_vslidedown(v, i, 2);
+    vfloat vv = __riscv_vslidedown(v, i, 2);
     __riscv_vse32(ptr, vv, 2);
     ptr += step * 2;
   }
