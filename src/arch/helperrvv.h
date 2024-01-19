@@ -211,6 +211,10 @@ typedef vuint64m1_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m4
 #define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
 #define SLEEF_RVV_DP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m2
+#define SLEEF_RVV_DP_VLMUL_EXT_VM __riscv_vlmul_ext_u64m2
+#define SLEEF_RVV_DP_VLMUL_EXT_VD2 __riscv_vlmul_ext_f64m2
+#define SLEEF_RVV_DP_VLMUL_EXT_3VD __riscv_vlmul_ext_f64m4
+#define SLEEF_RVV_DP_VLMUL_EXT_4VD __riscv_vlmul_ext_f64m4
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m1
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32mf2
@@ -318,6 +322,10 @@ typedef vuint64m2_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m8
 #define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
 #define SLEEF_RVV_DP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m4
+#define SLEEF_RVV_DP_VLMUL_EXT_VM __riscv_vlmul_ext_u64m4
+#define SLEEF_RVV_DP_VLMUL_EXT_VD2 __riscv_vlmul_ext_f64m4
+#define SLEEF_RVV_DP_VLMUL_EXT_3VD __riscv_vlmul_ext_f64m8
+#define SLEEF_RVV_DP_VLMUL_EXT_4VD __riscv_vlmul_ext_f64m8
 #define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m2
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32m1
@@ -352,12 +360,9 @@ static INLINE vfloat figetd_vf_di(fi_t d) {
 static INLINE vint2 figeti_vi2_di(fi_t d) {
   return SLEEF_RVV_SP_VGET_VI2(d, 1);
 }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
 static INLINE fi_t fisetdi_fi_vf_vi2(vfloat d, vint2 i) {
   fi_t res;
-  //res = SLEEF_RVV_SP_VLMUL_EXT_VI2(SLEEF_RVV_SP_VREINTERPRET_VI2(d));
-  res = __riscv_vset(res, 0, SLEEF_RVV_SP_VREINTERPRET_VI2(d));
+  res = SLEEF_RVV_SP_VLMUL_EXT_VI2(SLEEF_RVV_SP_VREINTERPRET_VI2(d));
   res = __riscv_vset(res, 1, i);
   return res;
 }
@@ -369,8 +374,7 @@ static INLINE vint2 dfigeti_vi2_dfi(dfi_t d) {
 }
 static INLINE dfi_t dfisetdfi_dfi_vf2_vi2(vfloat2 v, vint2 i) {
   dfi_t res;
-  //res = SLEEF_RVV_SP_VLMUL_EXT_2VI(SLEEF_RVV_SP_VREINTERPRET_2VI(v));
-  res = __riscv_vset(res, 0, SLEEF_RVV_SP_VREINTERPRET_2VI(v));
+  res = SLEEF_RVV_SP_VLMUL_EXT_2VI(SLEEF_RVV_SP_VREINTERPRET_2VI(v));
   res = __riscv_vset(res, 2, i);
   return res;
 }
@@ -386,8 +390,7 @@ static INLINE vfloat vf2gety_vf_vf2(vfloat2 v) {
 }
 static INLINE vfloat2 vf2setxy_vf2_vf_vf(vfloat x, vfloat y) {
   vfloat2 res;
-  //res = SLEEF_RVV_SP_VLMUL_EXT_VF(x);
-  res = __riscv_vset(res, 0, x);
+  res = SLEEF_RVV_SP_VLMUL_EXT_VF(x);
   res = __riscv_vset(res, 1, y);
   return res;
 }
@@ -400,8 +403,7 @@ static INLINE vfloat2 vf2sety_vf2_vf2_vf(vfloat2 v, vfloat d) {
 // df2 type
 static df2 df2setab_df2_vf2_vf2(vfloat2 a, vfloat2 b) {
   df2 res;
-  //res = SLEEF_RVV_SP_VLMUL_EXT_VF2(a);
-  res = __riscv_vset(res, 0, a);
+  res = SLEEF_RVV_SP_VLMUL_EXT_VF2(a);
   res = __riscv_vset(res, 1, b);
   return res;
 }
@@ -720,7 +722,7 @@ static INLINE const vdouble vd2gety_vd_vd2(vdouble2 v) {
 }
 static INLINE const vdouble2 vd2setxy_vd2_vd_vd(vdouble x, vdouble y) {
   vdouble2 res;
-  res = __riscv_vset(res, 0, x);
+  res = SLEEF_RVV_DP_VLMUL_EXT_VD2(x);
   res = __riscv_vset(res, 1, y);
   return res;
 }
@@ -733,7 +735,7 @@ static INLINE const vdouble2 vd2sety_vd2_vd2_vd(vdouble2 v, vdouble d) {
 // dd2 type
 static dd2 dd2setab_dd2_vd2_vd2(vdouble2 a, vdouble2 b) {
   dd2 res;
-  res = __riscv_vset(res, 0, a);
+  res = SLEEF_RVV_DP_VLMUL_EXT_4VD(a);
   res = __riscv_vset(res, 1, b);
   return res;
 }
@@ -745,7 +747,7 @@ static INLINE vdouble vd3gety_vd_vd3(vdouble3 v) { return SLEEF_RVV_DP_VGET_VD(v
 static INLINE vdouble vd3getz_vd_vd3(vdouble3 v) { return SLEEF_RVV_DP_VGET_VD(v, 2); }
 static INLINE vdouble3 vd3setxyz_vd3_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   vdouble3 res;
-  res = __riscv_vset(res, 0, x);
+  res = SLEEF_RVV_DP_VLMUL_EXT_3VD(x);
   res = __riscv_vset(res, 1, y);
   res = __riscv_vset(res, 2, z);
   return res;
@@ -768,7 +770,7 @@ static INLINE vint digeti_vi_di(di_t d) {
 }
 static INLINE di_t disetdi_di_vd_vi(vdouble d, vint i) {
   di_t res;
-  res = SLEEF_RVV_DP_VREINTERPRET_4VI_VD2(__riscv_vset(SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(res), 0, d));
+  res = SLEEF_RVV_DP_VREINTERPRET_4VI_VD2(SLEEF_RVV_DP_VLMUL_EXT_VD2(d));
 #if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   res = __riscv_vset(res, 1, __riscv_vlmul_ext_i32m1(i));
 #elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
@@ -793,7 +795,7 @@ static INLINE vint ddigeti_vi_ddi(ddi_t d) {
 }
 static INLINE ddi_t ddisetddi_ddi_vd2_vi(vdouble2 v, vint i) {
   ddi_t res;
-  res = SLEEF_RVV_DP_VREINTERPRET_8VI_4VD(__riscv_vset(SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(res), 0, v));
+  res = SLEEF_RVV_DP_VREINTERPRET_8VI_4VD(SLEEF_RVV_DP_VLMUL_EXT_4VD(v));
 #if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
   res = __riscv_vset(res, 2, __riscv_vlmul_ext_i32m1(i));
 #elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
@@ -1038,14 +1040,12 @@ static INLINE const vmask vqgetx_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v,
 static INLINE const vmask vqgety_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v, 1); }
 static INLINE vquad vqsetxy_vq_vm_vm(vmask x, vmask y) {
   vquad res;
-  res = __riscv_vset(res, 0, x);
+  res = SLEEF_RVV_DP_VLMUL_EXT_VM(x);
   res = __riscv_vset(res, 1, y);
   return res;
 }
 static INLINE vquad vqsetx_vq_vq_vm(vquad v, vmask x) { return __riscv_vset(v, 0, x); }
 static INLINE vquad vqsety_vq_vq_vm(vquad v, vmask y) { return __riscv_vset(v, 1, y); }
-
-#pragma GCC diagnostic pop
 
 
 /****************************************/
