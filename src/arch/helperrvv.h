@@ -77,30 +77,30 @@
 #error Cannot simultaneously define ENABLE_RVV_SP and ENABLE_RVV_DP
 #endif
 
-#ifdef ENABLE_RVV_SP
-// Types that conflict with ENABLE_RVV_DP
 #if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-typedef vuint64m2_t vmask;
-typedef vbool32_t vopmask;
+typedef vuint64m2_t rvv_sp_vmask;
+typedef vuint64m1_t rvv_dp_vmask;
+typedef vbool32_t rvv_sp_vopmask;
+typedef vbool64_t rvv_dp_vopmask;
 #elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-typedef vuint64m4_t vmask;
-typedef vbool16_t vopmask;
+typedef vuint64m4_t rvv_sp_vmask;
+typedef vuint64m2_t rvv_dp_vmask;
+typedef vbool16_t rvv_sp_vopmask;
+typedef vbool32_t rvv_dp_vopmask;
 #else
 #error "unknown rvv lmul"
 #endif
+
+#ifdef ENABLE_RVV_SP
+// Types that conflict with ENABLE_RVV_DP
+typedef rvv_sp_vmask vmask;
+typedef rvv_sp_vopmask vopmask;
 #endif
 
 #ifdef ENABLE_RVV_DP
 // Types that conflict with ENABLE_RVV_SP
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-typedef vuint64m1_t vmask;
-typedef vbool64_t vopmask;
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-typedef vuint64m2_t vmask;
-typedef vbool32_t vopmask;
-#else
-#error "unknown rvv lmul"
-#endif
+typedef rvv_dp_vmask vmask;
+typedef rvv_dp_vopmask vopmask;
 #endif
 
 // LMUL-Dependent Type & Macro Definitions:
@@ -127,22 +127,17 @@ typedef vfloat32m4_t df2;
 typedef vint32m1_t vint2;
 typedef vint32m2_t fi_t;
 typedef vint32m4_t dfi_t;
+typedef vuint64m1_t rvv_dp_vuint2;
 
 #define SLEEF_RVV_SP_LMUL 1
 #define SLEEF_RVV_DP_LMUL 1
+#define SLEEF_RVV_DP_RUNTIME_VL() __riscv_vsetvlmax_e64m1()
 #if SLEEF_RVV_VLEN == 0
 #define VECTLENSP (__riscv_vsetvlmax_e32m1())
-#define VECTLENDP (__riscv_vsetvlmax_e64m1())
-static INLINE int vavailability_i(int name) {
-    (void)__riscv_vsetvlmax_e64m1();  // raise sigill if not supported
-    return 3;
-}
+#define VECTLENDP SLEEF_RVV_DP_RUNTIME_VL()
 #else
 #define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
 #define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
-static INLINE int vavailability_i(int name) {
-    return (__riscv_vsetvlmax_e64m1() >= VECTLENDP) ? 3 : 0;
-}
 #endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m1
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m1
@@ -155,6 +150,8 @@ static INLINE int vavailability_i(int name) {
 #define SLEEF_RVV_SP_VREINTERPRET_4VI __riscv_vreinterpret_i32m4
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VU2 __riscv_vreinterpret_u32m1
+#define SLEEF_RVV_SP_VREINTERPRET_VOM __riscv_vreinterpret_b32
+#define SLEEF_RVV_SP_VID()  __riscv_vid_v_u32m1(VECTLENSP)
 #define SLEEF_RVV_SP_VGET_VI2 __riscv_vget_i32m1
 #define SLEEF_RVV_SP_VGET_2VI __riscv_vget_i32m2
 #define SLEEF_RVV_SP_VGET_VF __riscv_vget_f32m1
@@ -201,6 +198,8 @@ static INLINE int vavailability_i(int name) {
 #define SLEEF_RVV_DP_VREINTERPRET_VU __riscv_vreinterpret_u32mf2
 #define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m4
+#define SLEEF_RVV_DP_VREINTERPRET_VOM __riscv_vreinterpret_b64
+#define SLEEF_RVV_DP_VID()  __riscv_vid_v_u64m1(VECTLENDP)
 #define SLEEF_RVV_DP_VGET_VM __riscv_vget_u64m1
 #define SLEEF_RVV_DP_VGET_VD __riscv_vget_f64m1
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m2
@@ -235,21 +234,17 @@ typedef vfloat32m8_t df2;
 typedef vint32m2_t vint2;
 typedef vint32m4_t fi_t;
 typedef vint32m8_t dfi_t;
+typedef vuint64m2_t rvv_dp_vuint2;
+
 #define SLEEF_RVV_SP_LMUL 2
 #define SLEEF_RVV_DP_LMUL 2
+#define SLEEF_RVV_DP_RUNTIME_VL() __riscv_vsetvlmax_e64m2()
 #if SLEEF_RVV_VLEN == 0
 #define VECTLENSP (__riscv_vsetvlmax_e32m2())
-#define VECTLENDP (__riscv_vsetvlmax_e64m2())
-static INLINE int vavailability_i(int name) {
-    (void)__riscv_vsetvlmax_e64m2();  // raise sigill if not supported
-    return 3;
-}
+#define VECTLENDP SLEEF_RVV_DP_RUNTIME_VL()
 #else
 #define VECTLENSP (SLEEF_RVV_SP_LMUL * SLEEF_RVV_VLEN / sizeof(float))
 #define VECTLENDP (SLEEF_RVV_DP_LMUL * SLEEF_RVV_VLEN / sizeof(double))
-static INLINE int vavailability_i(int name) {
-    return (__riscv_vsetvlmax_e64m2() >= VECTLENDP) ? 3 : 0;
-}
 #endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m2
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m2
@@ -262,6 +257,8 @@ static INLINE int vavailability_i(int name) {
 #define SLEEF_RVV_SP_VREINTERPRET_4VI __riscv_vreinterpret_i32m8
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VU2 __riscv_vreinterpret_u32m2
+#define SLEEF_RVV_SP_VREINTERPRET_VOM __riscv_vreinterpret_b16
+#define SLEEF_RVV_SP_VID()  __riscv_vid_v_u32m2(VECTLENSP)
 #define SLEEF_RVV_SP_VGET_VI2 __riscv_vget_i32m2
 #define SLEEF_RVV_SP_VGET_2VI __riscv_vget_i32m4
 #define SLEEF_RVV_SP_VGET_VF __riscv_vget_f32m2
@@ -308,6 +305,8 @@ static INLINE int vavailability_i(int name) {
 #define SLEEF_RVV_DP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m4
+#define SLEEF_RVV_DP_VREINTERPRET_VOM __riscv_vreinterpret_b32
+#define SLEEF_RVV_DP_VID()  __riscv_vid_v_u64m2(VECTLENDP)
 #define SLEEF_RVV_DP_VGET_VM __riscv_vget_u64m2
 #define SLEEF_RVV_DP_VGET_VD __riscv_vget_f64m2
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m4
@@ -331,6 +330,13 @@ static INLINE int vavailability_i(int name) {
 #endif // ENABLE_RVVM1
 
 typedef vquad vargquad;
+
+static INLINE int vavailability_i(int name) {
+  // Note that VECTLENDP may be defined to SLEEF_RVV_DP_RUNTIME_VL().  That
+  // case isn't entirely redundant because it's still an opportunity to raise
+  // SIGILL to be captured by the caller if vector isn't supported.
+  return (SLEEF_RVV_DP_RUNTIME_VL() >= VECTLENDP) ? 3 : 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Single-Precision Functions
@@ -1141,41 +1147,25 @@ static INLINE vint vand_vi_vo_vi(vopmask x, vint y) {
 /****************************************/
 
 static INLINE vdouble vposneg_vd_vd(vdouble d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vbool64_t mask = __riscv_vreinterpret_b64(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
-#endif
+  rvv_dp_vopmask mask = SLEEF_RVV_DP_VREINTERPRET_VOM(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
   vdouble nd = __riscv_vfneg(d, VECTLENDP);
   return __riscv_vmerge(nd, d, mask, VECTLENDP);
 }
 
 static INLINE vdouble vnegpos_vd_vd(vdouble d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vbool64_t mask = __riscv_vreinterpret_b64(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
-#endif
+  rvv_dp_vopmask mask = SLEEF_RVV_DP_VREINTERPRET_VOM(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
   vdouble nd = __riscv_vfneg(d, VECTLENDP);
   return __riscv_vmerge(nd, d, mask, VECTLENDP);
 }
 
 static INLINE vfloat vposneg_vf_vf(vfloat d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vbool16_t mask = __riscv_vreinterpret_b16(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
-#endif
+  rvv_sp_vopmask mask = SLEEF_RVV_SP_VREINTERPRET_VOM(__riscv_vmv_v_x_u8m1(0x55, __riscv_vsetvlmax_e8m1()));
   vfloat nd = __riscv_vfneg(d, VECTLENSP);
   return __riscv_vmerge(nd, d, mask, VECTLENSP);
 }
 
 static INLINE vfloat vnegpos_vf_vf(vfloat d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vbool32_t mask = __riscv_vreinterpret_b32(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vbool16_t mask = __riscv_vreinterpret_b16(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
-#endif
+  rvv_sp_vopmask mask = SLEEF_RVV_SP_VREINTERPRET_VOM(__riscv_vmv_v_x_u8m1(0xaa, __riscv_vsetvlmax_e8m1()));
   vfloat nd = __riscv_vfneg(d, VECTLENSP);
   return __riscv_vmerge(nd, d, mask, VECTLENSP);
 }
@@ -1188,43 +1178,27 @@ static INLINE vfloat vmlsubadd_vf_vf_vf_vf(vfloat x, vfloat y, vfloat z) { retur
 //
 
 static INLINE vdouble vrev21_vd_vd(vdouble vd) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vuint64m1_t id = __riscv_vid_v_u64m1(VECTLENDP);
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vuint64m2_t id = __riscv_vid_v_u64m2(VECTLENDP);
-#endif
+  rvv_dp_vuint2 id = SLEEF_RVV_DP_VID();
   id = __riscv_vxor(id, 1, VECTLENDP);
   return __riscv_vrgather(vd, id, VECTLENDP);
 }
 
 static INLINE vfloat vrev21_vf_vf(vfloat vf) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vuint32m1_t id = __riscv_vid_v_u32m1(VECTLENSP);
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vuint32m2_t id = __riscv_vid_v_u32m2(VECTLENSP);
-#endif
+  vint2 id = SLEEF_RVV_SP_VREINTERPRET_VI2(SLEEF_RVV_SP_VID());
   id = __riscv_vxor(id, 1, VECTLENSP);
-  return __riscv_vrgather(vf, id, VECTLENSP);
+  return __riscv_vrgather(vf, SLEEF_RVV_SP_VREINTERPRET_VU2(id), VECTLENSP);
 }
 
 static INLINE vdouble vreva2_vd_vd(vdouble vd) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vuint64m1_t id = __riscv_vid_v_u64m1(VECTLENDP);
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vuint64m2_t id = __riscv_vid_v_u64m2(VECTLENDP);
-#endif
+  rvv_dp_vuint2 id = SLEEF_RVV_DP_VID();
   id = __riscv_vxor(id, VECTLENDP - 2, VECTLENDP);
   return __riscv_vrgather(vd, id, VECTLENDP);
 }
 
 static INLINE vfloat vreva2_vf_vf(vfloat vf) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  vuint32m1_t id = __riscv_vid_v_u32m1(VECTLENSP);
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-  vuint32m2_t id = __riscv_vid_v_u32m2(VECTLENSP);
-#endif
+  vint2 id = SLEEF_RVV_SP_VREINTERPRET_VI2(SLEEF_RVV_SP_VID());
   id = __riscv_vxor(id, VECTLENSP - 2, VECTLENSP);
-  return __riscv_vrgather(vf, id, VECTLENSP);
+  return __riscv_vrgather(vf, SLEEF_RVV_SP_VREINTERPRET_VU2(id), VECTLENSP);
 }
 
 //
