@@ -227,8 +227,6 @@ jobs:
             EXTRA_CMAKE_FLAGS="${EXTRA_CMAKE_FLAGS} -DSLEEF_ENFORCE_RVVM1=ON -DSLEEF_ENFORCE_RVVM2=ON"
             # Disable inline headers, they just don't compile on riscv64
             EXTRA_CMAKE_FLAGS="${EXTRA_CMAKE_FLAGS} -DSLEEF_BUILD_INLINE_HEADERS=OFF"
-            # Disable quad, it's missing the `Sleef_quad` function
-            EXTRA_CMAKE_FLAGS="${EXTRA_CMAKE_FLAGS} -DSLEEF_BUILD_QUAD=OFF"
           fi
 
           cmake -S . -B _build-${{ matrix.arch }} -GNinja \
