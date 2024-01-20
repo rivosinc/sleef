@@ -165,10 +165,9 @@ typedef vuint64m1_t rvv_dp_vuint2;
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m1
 #define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m1
 #define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m2
-#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u64m2
 #define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m2
-#define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m1
+#define SLEEF_RVV_SP_LOAD_2VI __riscv_vle32_v_i32m2
 #define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m1_rm
 #define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m1
 #define SLEEF_RVV_SP_VFCVT_X_F_VF_RM __riscv_vfcvt_x_f_v_i32m1_rm
@@ -192,19 +191,20 @@ typedef vuint64m1_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VREINTERPRET_VU64 __riscv_vreinterpret_u64m1
 #define SLEEF_RVV_DP_VREINTERPRET_VI __riscv_vreinterpret_i32mf2
 #define SLEEF_RVV_DP_VREINTERPRET_VI2 __riscv_vreinterpret_i32m1
-#define SLEEF_RVV_DP_VREINTERPRET_2VI __riscv_vreinterpret_i32m2
-#define SLEEF_RVV_DP_VREINTERPRET_4VI __riscv_vreinterpret_i32m4
-#define SLEEF_RVV_DP_VREINTERPRET_8VI __riscv_vreinterpret_i32m8
+#define SLEEF_RVV_DP_VREINTERPRET_2VI __riscv_vreinterpret_i32m1
+#define SLEEF_RVV_DP_VREINTERPRET_4VI __riscv_vreinterpret_i32m2
+#define SLEEF_RVV_DP_VREINTERPRET_8VI __riscv_vreinterpret_i32m4
 #define SLEEF_RVV_DP_VREINTERPRET_VU __riscv_vreinterpret_u32mf2
-#define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m2
-#define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m4
+#define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m1
+#define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_DP_VREINTERPRET_VOM __riscv_vreinterpret_b64
 #define SLEEF_RVV_DP_VID()  __riscv_vid_v_u64m1(VECTLENDP)
 #define SLEEF_RVV_DP_VGET_VM __riscv_vget_u64m1
 #define SLEEF_RVV_DP_VGET_VD __riscv_vget_f64m1
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m2
 #define SLEEF_RVV_DP_VGET_4VD __riscv_vget_f64m2
-#define SLEEF_RVV_DP_VGET_VI __riscv_vget_i32m1
+#define SLEEF_RVV_DP_VGET_VI(v,i) \
+  __riscv_vlmul_trunc_i32mf2(__riscv_vget_i32m1(v, (i) / 2))
 #define SLEEF_RVV_DP_VGET_VI2 __riscv_vget_i32m1
 #define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m1
 #define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m2
@@ -215,7 +215,8 @@ typedef vuint64m1_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VLMUL_EXT_VD2 __riscv_vlmul_ext_f64m2
 #define SLEEF_RVV_DP_VLMUL_EXT_3VD __riscv_vlmul_ext_f64m4
 #define SLEEF_RVV_DP_VLMUL_EXT_4VD __riscv_vlmul_ext_f64m4
-#define SLEEF_RVV_DP_VGET_VU __riscv_vget_u32m1
+#define SLEEF_RVV_DP_VGET_VU(v,i) \
+  __riscv_vlmul_trunc_u32mf2(__riscv_vget_u32m1(v, (i) / 2))
 #define SLEEF_RVV_DP_LOAD_VD __riscv_vle64_v_f64m1
 #define SLEEF_RVV_DP_LOAD_VI __riscv_vle32_v_i32mf2
 #define SLEEF_RVV_DP_VFNCVT_X_F_VI __riscv_vfncvt_x_f_w_i32mf2_rm
@@ -276,10 +277,9 @@ typedef vuint64m2_t rvv_dp_vuint2;
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m2
 #define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m2
 #define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m4
-#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u64m4
 #define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m4
-#define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m2
+#define SLEEF_RVV_SP_LOAD_2VI __riscv_vle32_v_i32m4
 #define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m2_rm
 #define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m2
 #define SLEEF_RVV_SP_VFCVT_X_F_VF_RM __riscv_vfcvt_x_f_v_i32m2_rm
@@ -302,7 +302,7 @@ typedef vuint64m2_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VU64 __riscv_vreinterpret_u64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VI __riscv_vreinterpret_i32m1
-#define SLEEF_RVV_DP_VREINTERPRET_VI2 __riscv_vreinterpret_i32m1
+#define SLEEF_RVV_DP_VREINTERPRET_VI2 __riscv_vreinterpret_i32m2
 #define SLEEF_RVV_DP_VREINTERPRET_2VI __riscv_vreinterpret_i32m2
 #define SLEEF_RVV_DP_VREINTERPRET_4VI __riscv_vreinterpret_i32m4
 #define SLEEF_RVV_DP_VREINTERPRET_8VI __riscv_vreinterpret_i32m8
@@ -316,11 +316,11 @@ typedef vuint64m2_t rvv_dp_vuint2;
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m4
 #define SLEEF_RVV_DP_VGET_4VD __riscv_vget_f64m4
 #define SLEEF_RVV_DP_VGET_VI __riscv_vget_i32m1
-#define SLEEF_RVV_DP_VGET_VI2 __riscv_vget_i32m1
+#define SLEEF_RVV_DP_VGET_VI2 __riscv_vget_i32m2
 #define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m2
 #define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m4
 #define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m8
-#define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m2
+#define SLEEF_RVV_DP_VLMUL_EXT_VI2 __riscv_vlmul_ext_i32m4
 #define SLEEF_RVV_DP_VLMUL_EXT_2VI __riscv_vlmul_ext_i32m4
 #define SLEEF_RVV_DP_VLMUL_EXT_VM __riscv_vlmul_ext_u64m4
 #define SLEEF_RVV_DP_VLMUL_EXT_VD2 __riscv_vlmul_ext_f64m4
@@ -760,13 +760,7 @@ static INLINE vdouble digetd_vd_di(di_t d) {
   return SLEEF_RVV_DP_VGET_VD(SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(d), 0);
 }
 static INLINE vint digeti_vi_di(di_t d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  return __riscv_vlmul_trunc_i32mf2(SLEEF_RVV_DP_VGET_VI(d, 1));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   return SLEEF_RVV_DP_VGET_VI(d, 2);
-#else
-#error "unknown rvv lmul"
-#endif
 }
 static INLINE di_t disetdi_di_vd_vi(vdouble d, vint i) {
   di_t res;
@@ -785,13 +779,7 @@ static INLINE vdouble2 ddigetdd_vd2_ddi(ddi_t d) {
   return SLEEF_RVV_DP_VGET_VD2(SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(d), 0);
 }
 static INLINE vint ddigeti_vi_ddi(ddi_t d) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-  return __riscv_vlmul_trunc_i32mf2(SLEEF_RVV_DP_VGET_VI(d, 2));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
   return SLEEF_RVV_DP_VGET_VI(d, 4);
-#else
-#error "unknown rvv lmul"
-#endif
 }
 static INLINE ddi_t ddisetddi_ddi_vd2_vi(vdouble2 v, vint i) {
   ddi_t res;
@@ -1246,11 +1234,7 @@ static int vcast_i_vi2(vint2 v) {
 //
 
 static vquad loadu_vq_p(const int32_t *ptr) {
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
-    return __riscv_vreinterpret_u64m2(__riscv_vreinterpret_u32m2(__riscv_vle32_v_i32m2(ptr, VECTLENSP * 2)));
-#elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
-    return __riscv_vreinterpret_u64m4(__riscv_vreinterpret_u32m4(__riscv_vle32_v_i32m4(ptr, VECTLENSP * 2)));
-#endif
+    return SLEEF_RVV_SP_VREINTERPRET_VM(SLEEF_RVV_DP_VREINTERPRET_4VU(SLEEF_RVV_SP_LOAD_2VI(ptr, VECTLENSP * 2)));
 }
 
 static INLINE vquad cast_vq_aq(vargquad aq) { return aq; }
