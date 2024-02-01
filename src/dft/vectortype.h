@@ -37,7 +37,7 @@
 #include "helpersve.h"
 #endif
 
-#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA) || defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
+#if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM2)
 #include "helperrvv.h"
 #endif
 
