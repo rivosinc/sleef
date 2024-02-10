@@ -128,8 +128,8 @@
 // LMUL=2 is currently the widest option for SLEEF function argument types.
 #if defined(ENABLE_RVVM1) || defined(ENABLE_RVVM1NOFMA)
 
-typedef vuint64m2_t rvv_sp_vmask;
-typedef vuint64m1_t rvv_dp_vmask;
+typedef vuint32m1_t rvv_vmask32;
+typedef vuint64m1_t vmask;
 typedef vbool32_t rvv_sp_vopmask;
 typedef vbool64_t rvv_dp_vopmask;
 
@@ -166,14 +166,11 @@ typedef vfloat64m1x4_t tdi_t;
 #endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m1
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m1
-#define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VF __riscv_vreinterpret_f32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VF2 __riscv_vreinterpret_f32m2
-#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u64m2
-#define SLEEF_RVV_SP_VREINTERPRET_VM_SIGNED __riscv_vreinterpret_i64m2
+#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VI2 __riscv_vreinterpret_i32m1
 #define SLEEF_RVV_SP_VREINTERPRET_2VI __riscv_vreinterpret_i32m2
-#define SLEEF_RVV_SP_VREINTERPRET_4VI __riscv_vreinterpret_i32m4
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VU2 __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_SP_VREINTERPRET_VOM __riscv_vreinterpret_b32
@@ -182,18 +179,12 @@ typedef vfloat64m1x4_t tdi_t;
 #define SLEEF_RVV_SP_VGET_2VI __riscv_vget_i32m2
 #define SLEEF_RVV_SP_VGET_VF __riscv_vget_f32m1
 #define SLEEF_RVV_SP_VGET_VF2 __riscv_vget_f32m2
-#define SLEEF_RVV_SP_VGET_4VF __riscv_vget_f32m4
-#define SLEEF_RVV_SP_VGET_VU2 __riscv_vget_u32m2
 #define SLEEF_RVV_SP_VCREATE_FI __riscv_vcreate_v_i32m1_i32m2
 #define SLEEF_RVV_SP_VCREATE_DFI __riscv_vcreate_v_i32m2_i32m4
 #define SLEEF_RVV_SP_VCREATE_DF2 __riscv_vcreate_v_f32m2_f32m4
 #define SLEEF_RVV_SP_VCREATE_VF2 __riscv_vcreate_v_f32m1_f32m2
 #define SLEEF_RVV_SP_VLMUL_EXT_VI2_TO_FI(v) SLEEF_RVV_VEXT(e32m1, i32m1_i32m2, v)
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m1
-#define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m1
-#define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m2
-#define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m2
-#define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m1
 #define SLEEF_RVV_SP_LOAD_2VI __riscv_vle32_v_i32m2
 #define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m1_rm
 #define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m1
@@ -203,39 +194,24 @@ typedef vfloat64m1x4_t tdi_t;
 #define SLEEF_RVV_DP_VCAST_VI_I __riscv_vmv_v_x_i32mf2
 #define SLEEF_RVV_DP_VCAST_VM_U __riscv_vmv_v_x_u64m1
 #define SLEEF_RVV_DP_VREINTERPRET_VD(v) __riscv_vreinterpret_f64m1(__riscv_vreinterpret_i64m1(v))
-#define SLEEF_RVV_DP_VREINTERPRET_VD2 __riscv_vreinterpret_f64m2
-#define SLEEF_RVV_DP_VREINTERPRET_4VI_VD2(x) \
-  __riscv_vreinterpret_v_i64m2_i32m2(__riscv_vreinterpret_i64m2(x))
-#define SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(x) \
-  __riscv_vreinterpret_f64m2(__riscv_vreinterpret_v_i32m2_i64m2(x))
-#define SLEEF_RVV_DP_VREINTERPRET_4VD __riscv_vreinterpret_f64m4
 #define SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(x) \
   __riscv_vreinterpret_f64m4(__riscv_vreinterpret_v_i32m4_i64m4(x))
-#define SLEEF_RVV_DP_VREINTERPRET_8VI_4VD(x) \
-  __riscv_vreinterpret_v_i64m4_i32m4(__riscv_vreinterpret_i64m4(x))
 #define SLEEF_RVV_DP_VREINTERPRET_VM __riscv_vreinterpret_u64m1
 #define SLEEF_RVV_DP_VREINTERPRET_VM_SIGNED __riscv_vreinterpret_i64m1
 #define SLEEF_RVV_DP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m1
-#define SLEEF_RVV_DP_VREINTERPRET_VU64 __riscv_vreinterpret_u64m1
 #define SLEEF_RVV_DP_VREINTERPRET_VI __riscv_vreinterpret_i32mf2
 #define SLEEF_RVV_DP_VREINTERPRET_VI2(v) __riscv_vreinterpret_i32m1(__riscv_vreinterpret_i64m1(v))
-#define SLEEF_RVV_DP_VREINTERPRET_2VI __riscv_vreinterpret_i32m1
 #define SLEEF_RVV_DP_VREINTERPRET_4VI(v) __riscv_vreinterpret_i32m2(__riscv_vreinterpret_i64m2(v))
-#define SLEEF_RVV_DP_VREINTERPRET_8VI __riscv_vreinterpret_i32m4
 #define SLEEF_RVV_DP_VREINTERPRET_VU __riscv_vreinterpret_u32mf2
-#define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m1
 #define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m2
+#define SLEEF_RVV_DP_VREINTERPRET_VQ __riscv_vreinterpret_u64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VOM __riscv_vreinterpret_b64
 #define SLEEF_RVV_DP_VID()  __riscv_vid_v_u64m1(VECTLENDP)
 #define SLEEF_RVV_DP_VGET_VM __riscv_vget_u64m1
 #define SLEEF_RVV_DP_VGET_VD __riscv_vget_f64m1
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m2
 #define SLEEF_RVV_DP_VGET_4VD __riscv_vget_f64m2
-#define SLEEF_RVV_DP_VGET_VU64(v,i) (v)
 #define SLEEF_RVV_DP_VGET_VI2 __riscv_vget_i32m1
-#define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m1
-#define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m2
-#define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m4
 #define SLEEF_RVV_DP_VCREATE_DI __riscv_vcreate_v_i32m1_i32m2
 #define SLEEF_RVV_DP_VCREATE_DDI(x, y) __riscv_vcreate_v_i32m2_i32m4(x, SLEEF_RVV_VEXT(e32mf2, i32mf2_i32m2,  y))
 #define SLEEF_RVV_DP_VCREATE_TD __riscv_vcreate_v_f64m1x4
@@ -253,8 +229,8 @@ typedef vfloat64m1x4_t tdi_t;
 
 #elif defined(ENABLE_RVVM2) || defined(ENABLE_RVVM2NOFMA)
 
-typedef vuint64m4_t rvv_sp_vmask;
-typedef vuint64m2_t rvv_dp_vmask;
+typedef vuint32m2_t rvv_vmask32;
+typedef vuint64m2_t vmask;
 typedef vbool16_t rvv_sp_vopmask;
 typedef vbool32_t rvv_dp_vopmask;
 
@@ -291,14 +267,11 @@ typedef vfloat64m2x4_t tdi_t;
 #endif
 #define SLEEF_RVV_SP_VCAST_VF_F __riscv_vfmv_v_f_f32m2
 #define SLEEF_RVV_SP_VCAST_VI2_I __riscv_vmv_v_x_i32m2
-#define SLEEF_RVV_SP_VCAST_VU2_U __riscv_vmv_v_x_u32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VF __riscv_vreinterpret_f32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VF2 __riscv_vreinterpret_f32m4
-#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u64m4
-#define SLEEF_RVV_SP_VREINTERPRET_VM_SIGNED __riscv_vreinterpret_i64m4
+#define SLEEF_RVV_SP_VREINTERPRET_VM __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VI2 __riscv_vreinterpret_i32m2
 #define SLEEF_RVV_SP_VREINTERPRET_2VI __riscv_vreinterpret_i32m4
-#define SLEEF_RVV_SP_VREINTERPRET_4VI __riscv_vreinterpret_i32m8
 #define SLEEF_RVV_SP_VREINTERPRET_VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VU2 __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_SP_VREINTERPRET_VOM __riscv_vreinterpret_b16
@@ -307,18 +280,12 @@ typedef vfloat64m2x4_t tdi_t;
 #define SLEEF_RVV_SP_VGET_2VI __riscv_vget_i32m4
 #define SLEEF_RVV_SP_VGET_VF __riscv_vget_f32m2
 #define SLEEF_RVV_SP_VGET_VF2 __riscv_vget_f32m4
-#define SLEEF_RVV_SP_VGET_4VF __riscv_vget_f32m8
-#define SLEEF_RVV_SP_VGET_VU2 __riscv_vget_u32m4
 #define SLEEF_RVV_SP_VCREATE_FI __riscv_vcreate_v_i32m2_i32m4
 #define SLEEF_RVV_SP_VCREATE_DFI __riscv_vcreate_v_i32m4_i32m8
 #define SLEEF_RVV_SP_VCREATE_DF2 __riscv_vcreate_v_f32m4_f32m8
 #define SLEEF_RVV_SP_VCREATE_VF2 __riscv_vcreate_v_f32m2_f32m4
 #define SLEEF_RVV_SP_VLMUL_EXT_VI2_TO_FI(v) SLEEF_RVV_VEXT(e32m2, i32m2_i32m4, v)
 #define SLEEF_RVV_SP_LOAD_VF __riscv_vle32_v_f32m2
-#define SLEEF_RVV_SP_LOAD_VI2 __riscv_vle32_v_i32m2
-#define SLEEF_RVV_SP_VCAST_VM_U __riscv_vmv_v_x_u64m4
-#define SLEEF_RVV_SP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m4
-#define SLEEF_RVV_SP_LOAD_VI __riscv_vle32_v_i32m2
 #define SLEEF_RVV_SP_LOAD_2VI __riscv_vle32_v_i32m4
 #define SLEEF_RVV_SP_VFNCVT_X_F_VI __riscv_vfcvt_x_f_v_i32m2_rm
 #define SLEEF_RVV_SP_VFCVT_F_X_VF __riscv_vfcvt_f_x_v_f32m2
@@ -328,39 +295,24 @@ typedef vfloat64m2x4_t tdi_t;
 #define SLEEF_RVV_DP_VCAST_VI_I __riscv_vmv_v_x_i32m1
 #define SLEEF_RVV_DP_VCAST_VM_U __riscv_vmv_v_x_u64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VD(v) __riscv_vreinterpret_f64m2(__riscv_vreinterpret_i64m2(v))
-#define SLEEF_RVV_DP_VREINTERPRET_VD2 __riscv_vreinterpret_f64m4
-#define SLEEF_RVV_DP_VREINTERPRET_4VI_VD2(x) \
-  __riscv_vreinterpret_v_i64m4_i32m4(__riscv_vreinterpret_i64m4(x))
-#define SLEEF_RVV_DP_VREINTERPRET_VD2_4VI(x) \
-  __riscv_vreinterpret_f64m4(__riscv_vreinterpret_v_i32m4_i64m4(x))
-#define SLEEF_RVV_DP_VREINTERPRET_4VD __riscv_vreinterpret_f64m8
 #define SLEEF_RVV_DP_VREINTERPRET_4VD_8VI(x) \
   __riscv_vreinterpret_f64m8(__riscv_vreinterpret_v_i32m8_i64m8(x))
-#define SLEEF_RVV_DP_VREINTERPRET_8VI_4VD(x) \
-  __riscv_vreinterpret_v_i64m8_i32m8(__riscv_vreinterpret_i64m8(x))
 #define SLEEF_RVV_DP_VREINTERPRET_VM __riscv_vreinterpret_u64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VM_SIGNED __riscv_vreinterpret_i64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VI64 __riscv_vreinterpret_i64m2
-#define SLEEF_RVV_DP_VREINTERPRET_VU64 __riscv_vreinterpret_u64m2
 #define SLEEF_RVV_DP_VREINTERPRET_VI __riscv_vreinterpret_i32m1
 #define SLEEF_RVV_DP_VREINTERPRET_VI2(v) __riscv_vreinterpret_i32m2(__riscv_vreinterpret_i64m2(v))
-#define SLEEF_RVV_DP_VREINTERPRET_2VI __riscv_vreinterpret_i32m2
 #define SLEEF_RVV_DP_VREINTERPRET_4VI(v) __riscv_vreinterpret_i32m4(__riscv_vreinterpret_i64m4(v))
-#define SLEEF_RVV_DP_VREINTERPRET_8VI __riscv_vreinterpret_i32m8
 #define SLEEF_RVV_DP_VREINTERPRET_VU __riscv_vreinterpret_u32m1
-#define SLEEF_RVV_DP_VREINTERPRET_2VU __riscv_vreinterpret_u32m2
 #define SLEEF_RVV_DP_VREINTERPRET_4VU __riscv_vreinterpret_u32m4
+#define SLEEF_RVV_DP_VREINTERPRET_VQ __riscv_vreinterpret_u64m4
 #define SLEEF_RVV_DP_VREINTERPRET_VOM __riscv_vreinterpret_b32
 #define SLEEF_RVV_DP_VID()  __riscv_vid_v_u64m2(VECTLENDP)
 #define SLEEF_RVV_DP_VGET_VM __riscv_vget_u64m2
 #define SLEEF_RVV_DP_VGET_VD __riscv_vget_f64m2
 #define SLEEF_RVV_DP_VGET_VD2 __riscv_vget_f64m4
 #define SLEEF_RVV_DP_VGET_4VD __riscv_vget_f64m4
-#define SLEEF_RVV_DP_VGET_VU64(v,i) __riscv_vget_u64m1(v, (i) / 2)
 #define SLEEF_RVV_DP_VGET_VI2 __riscv_vget_i32m2
-#define SLEEF_RVV_DP_VGET_2VI __riscv_vget_i32m2
-#define SLEEF_RVV_DP_VGET_4VI __riscv_vget_i32m4
-#define SLEEF_RVV_DP_VGET_8VI __riscv_vget_i32m8
 #define SLEEF_RVV_DP_VCREATE_DI __riscv_vcreate_v_i32m2_i32m4
 #define SLEEF_RVV_DP_VCREATE_DDI(x, y) __riscv_vcreate_v_i32m4_i32m8(x, SLEEF_RVV_VEXT(e32m1, i32m1_i32m4, y))
 #define SLEEF_RVV_DP_VCREATE_TD __riscv_vcreate_v_f64m2x4
@@ -616,42 +568,26 @@ static INLINE vint2 vsrl_vi2_vi2_i(vint2 x, int c) {
 /****************************************/
 /* Bitmask Operations                   */
 /****************************************/
-static INLINE vfloat vreinterpret_vf_vm(rvv_sp_vmask vm) {
-  return SLEEF_RVV_SP_VREINTERPRET_VF(__riscv_vncvt_x(vm, VECTLENSP));
+static INLINE vfloat vreinterpret_vf_vm(vmask vm) {
+  return SLEEF_RVV_SP_VREINTERPRET_VF(SLEEF_RVV_SP_VREINTERPRET_VM(vm));
 }
-static INLINE rvv_sp_vmask vreinterpret_vm_vf(vfloat vf) {
-  return __riscv_vwcvtu_x(SLEEF_RVV_SP_VREINTERPRET_VU(vf), VECTLENSP);
+static INLINE vmask vreinterpret_vm_vf(vfloat vf) {
+  return SLEEF_RVV_DP_VREINTERPRET_VM(SLEEF_RVV_SP_VREINTERPRET_VM(vf));
 }
 static INLINE int vtestallones_i_vo32(rvv_sp_vopmask g) {
   return __riscv_vcpop(g, VECTLENSP) == VECTLENSP;
 }
-static INLINE rvv_sp_vmask rvv_sp_vcast_vm_i_i(int64_t h, int64_t l) {
-  return SLEEF_RVV_SP_VCAST_VM_U((((uint64_t)h) << 32) | (uint32_t) l, VECTLENSP);
+static INLINE vmask vor_vm_vo32_vm(rvv_sp_vopmask x, vmask y) {
+  rvv_vmask32 y32 = SLEEF_RVV_SP_VREINTERPRET_VM(y);
+  return SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vmerge(y32, -1, x, VECTLENSP));
 }
-static INLINE rvv_sp_vmask rvv_sp_vand_vm_vm_vm(rvv_sp_vmask x, rvv_sp_vmask y) {
-  return __riscv_vand(x, y, VECTLENSP);
+static INLINE vmask vand_vm_vo32_vm(rvv_sp_vopmask x, vmask y) {
+  rvv_vmask32 y32 = SLEEF_RVV_SP_VREINTERPRET_VM(y);
+  return SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vmerge(y32, 0, __riscv_vmnot(x, VECTLENSP), VECTLENSP));
 }
-static INLINE rvv_sp_vmask rvv_sp_vor_vm_vm_vm(rvv_sp_vmask x, rvv_sp_vmask y) {
-  return __riscv_vor(x, y, VECTLENSP);
-}
-static INLINE rvv_sp_vmask rvv_sp_vxor_vm_vm_vm(rvv_sp_vmask x, rvv_sp_vmask y) {
-  return __riscv_vxor(x, y, VECTLENSP);
-}
-static INLINE rvv_sp_vmask rvv_sp_vandnot_vm_vm_vm(rvv_sp_vmask x, rvv_sp_vmask y) {
-  return __riscv_vand(__riscv_vnot(x, VECTLENSP), y, VECTLENSP);
-}
-static INLINE rvv_sp_vmask vor_vm_vo32_vm(rvv_sp_vopmask x, rvv_sp_vmask y) {
-  return __riscv_vmerge(y, -1, x, VECTLENSP);
-}
-static INLINE rvv_sp_vmask vand_vm_vo32_vm(rvv_sp_vopmask x, rvv_sp_vmask y) {
-  return __riscv_vmerge(y, 0, __riscv_vmnot(x, VECTLENSP), VECTLENSP);
-}
-static INLINE rvv_sp_vmask vandnot_vm_vo32_vm(rvv_sp_vopmask x, rvv_sp_vmask y) {
-  return __riscv_vmerge(y, 0, x, VECTLENSP);
-}
-static INLINE vint rvv_sp_vcast_vi_vm(rvv_sp_vmask vm) {
-  return SLEEF_RVV_DP_VREINTERPRET_VI(SLEEF_RVV_DP_VREINTERPRET_VU(
-              __riscv_vncvt_x(__riscv_vncvt_x(vm, VECTLENSP), VECTLENSP * 2)));
+static INLINE vmask vandnot_vm_vo32_vm(rvv_sp_vopmask x, vmask y) {
+  rvv_vmask32 y32 = SLEEF_RVV_SP_VREINTERPRET_VM(y);
+  return SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vmerge(y32, 0, x, VECTLENSP));
 }
 
 /****************************************/
@@ -887,13 +823,18 @@ static INLINE vdouble vmin_vd_vd_vd(vdouble x, vdouble y) {
 static INLINE vdouble vmla_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   return __riscv_vfmadd(x, y, z, VECTLENDP);
 }
-// Multiply subtract: z = z - x * y
+// Multiply subtract: z = x * y - z
 static INLINE vdouble vmlapn_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
   return __riscv_vfmsub(x, y, z, VECTLENDP);
+}
+// z = z - x * y
+static INLINE vdouble vmlanp_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
+  return __riscv_vfnmsac(z, x, y, VECTLENDP);
 }
 #else
 static INLINE vdouble vmla_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vadd_vd_vd_vd(vmul_vd_vd_vd(x, y), z); }
 static INLINE vdouble vmlapn_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vsub_vd_vd_vd(vmul_vd_vd_vd(x, y), z); }
+static INLINE vdouble vmlanp_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) { return vsub_vd_vd_vd(z, vmul_vd_vd_vd(x, y)); }
 #endif
 // fused multiply add / sub
 static INLINE vdouble vfma_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
@@ -958,81 +899,81 @@ static INLINE vint vsrl_vi_vi_i(vint x, int c) {
 /****************************************/
 /* Bitmask Operations                   */
 /****************************************/
-static INLINE rvv_dp_vmask vcast_vm_i64(int64_t c) {
+static INLINE vmask vcast_vm_i64(int64_t c) {
   return SLEEF_RVV_DP_VCAST_VM_U(c, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vcast_vm_u64(uint64_t c) {
+static INLINE vmask vcast_vm_u64(uint64_t c) {
   return SLEEF_RVV_DP_VCAST_VM_U(c, VECTLENDP);
 }
-static INLINE rvv_dp_vmask rvv_dp_vcast_vm_i_i(int64_t h, int64_t l) {
+static INLINE vmask vcast_vm_i_i(int64_t h, int64_t l) {
   return SLEEF_RVV_DP_VCAST_VM_U((((uint64_t)h) << 32) | (uint32_t) l, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vcast_vm_vi(vint vi) {
+static INLINE vmask vcast_vm_vi(vint vi) {
   return SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vwcvt_x(vi, VECTLENDP));
 }
-static INLINE rvv_dp_vmask vcastu_vm_vi(vint vi) {
+static INLINE vmask vcastu_vm_vi(vint vi) {
   return __riscv_vsll(SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vwcvt_x(vi, VECTLENDP)), 32, VECTLENDP);
 }
-static INLINE vint vcastu_vi_vm(rvv_dp_vmask vm) {
+static INLINE vint vcastu_vi_vm(vmask vm) {
   return SLEEF_RVV_DP_VREINTERPRET_VI(__riscv_vnsrl(vm, 32, VECTLENDP));
 }
-static INLINE vint rvv_dp_vcast_vi_vm(rvv_dp_vmask vm) {
+static INLINE vint vcast_vi_vm(vmask vm) {
   return SLEEF_RVV_DP_VREINTERPRET_VI(__riscv_vncvt_x(vm, VECTLENDP));
 }
-static INLINE rvv_dp_vmask vand_vm_vo64_vm(rvv_dp_vopmask x, rvv_dp_vmask y) {
+static INLINE vmask vand_vm_vo64_vm(rvv_dp_vopmask x, vmask y) {
   return __riscv_vmerge(y, 0, __riscv_vmnot(x, VECTLENDP), VECTLENDP);
 }
-static INLINE rvv_dp_vmask rvv_dp_vand_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vand_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vand(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask rvv_dp_vor_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vor_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vor(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask rvv_dp_vxor_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vxor_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vxor(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask rvv_dp_vandnot_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vandnot_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vand(__riscv_vnot(x, VECTLENDP), y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vandnot_vm_vo64_vm(rvv_dp_vopmask x, rvv_dp_vmask y) {
+static INLINE vmask vandnot_vm_vo64_vm(rvv_dp_vopmask x, vmask y) {
   return __riscv_vmerge(y, 0, x, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vsll64_vm_vm_i(rvv_dp_vmask mask, int64_t c) {
+static INLINE vmask vsll64_vm_vm_i(vmask mask, int64_t c) {
   return __riscv_vsll(mask, c, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vsub64_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vsub64_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vsub(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vsrl64_vm_vm_i(rvv_dp_vmask mask, int64_t c) {
+static INLINE vmask vsrl64_vm_vm_i(vmask mask, int64_t c) {
   return __riscv_vsrl(mask, c, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vadd64_vm_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vadd64_vm_vm_vm(vmask x, vmask y) {
   return __riscv_vadd(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vor_vm_vo64_vm(rvv_dp_vopmask x, rvv_dp_vmask y) {
+static INLINE vmask vor_vm_vo64_vm(rvv_dp_vopmask x, vmask y) {
   return __riscv_vmerge(y, -1, x, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vsel_vm_vo64_vm_vm(rvv_dp_vopmask mask, rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE vmask vsel_vm_vo64_vm_vm(rvv_dp_vopmask mask, vmask x, vmask y) {
   return __riscv_vmerge(y, x, mask, VECTLENDP);
 }
-static INLINE rvv_dp_vmask vneg64_vm_vm(rvv_dp_vmask mask) {
+static INLINE vmask vneg64_vm_vm(vmask mask) {
   return SLEEF_RVV_DP_VREINTERPRET_VM(__riscv_vneg(SLEEF_RVV_DP_VREINTERPRET_VM_SIGNED(mask), VECTLENDP));
 }
-static INLINE vdouble vreinterpret_vd_vm(rvv_dp_vmask vm) {
+static INLINE vdouble vreinterpret_vd_vm(vmask vm) {
   return SLEEF_RVV_DP_VREINTERPRET_VD(vm);
 }
-static INLINE rvv_dp_vmask vreinterpret_vm_vd(vdouble vd) {
+static INLINE vmask vreinterpret_vm_vd(vdouble vd) {
   return SLEEF_RVV_DP_VREINTERPRET_VM(vd);
 }
 
 // vquad type
-static INLINE const rvv_dp_vmask vqgetx_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v, 0); }
-static INLINE const rvv_dp_vmask vqgety_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v, 1); }
-static INLINE vquad vqsetxy_vq_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE const vmask vqgetx_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v, 0); }
+static INLINE const vmask vqgety_vm_vq(vquad v) { return SLEEF_RVV_DP_VGET_VM(v, 1); }
+static INLINE vquad vqsetxy_vq_vm_vm(vmask x, vmask y) {
   return SLEEF_RVV_DP_VCREATE_VQ(x, y);
 }
-static INLINE vquad vqsetx_vq_vq_vm(vquad v, rvv_dp_vmask x) { return __riscv_vset(v, 0, x); }
-static INLINE vquad vqsety_vq_vq_vm(vquad v, rvv_dp_vmask y) { return __riscv_vset(v, 1, y); }
+static INLINE vquad vqsetx_vq_vq_vm(vquad v, vmask x) { return __riscv_vset(v, 0, x); }
+static INLINE vquad vqsety_vq_vq_vm(vquad v, vmask y) { return __riscv_vset(v, 1, y); }
 
 
 /****************************************/
@@ -1056,10 +997,10 @@ static INLINE rvv_dp_vopmask rvv_dp_vor_vo_vo_vo(rvv_dp_vopmask x, rvv_dp_vopmas
 static INLINE rvv_dp_vopmask rvv_dp_vxor_vo_vo_vo(rvv_dp_vopmask x, rvv_dp_vopmask y) {
   return __riscv_vmxor(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vopmask veq64_vo_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE rvv_dp_vopmask veq64_vo_vm_vm(vmask x, vmask y) {
   return __riscv_vmseq(x, y, VECTLENDP);
 }
-static INLINE rvv_dp_vopmask vgt64_vo_vm_vm(rvv_dp_vmask x, rvv_dp_vmask y) {
+static INLINE rvv_dp_vopmask vgt64_vo_vm_vm(vmask x, vmask y) {
   return __riscv_vmsgt(SLEEF_RVV_DP_VREINTERPRET_VM_SIGNED(x), SLEEF_RVV_DP_VREINTERPRET_VM_SIGNED(y), VECTLENDP);
 }
 // double-precision comparison
@@ -1213,7 +1154,7 @@ static INLINE void vscatter2_v_p_i_i_vf(float *ptr, int offset, int step, vfloat
 /****************************************/
 
 
-static INLINE rvv_dp_vmask tdxgete_vm_tdx(tdx t) {
+static INLINE vmask tdxgete_vm_tdx(tdx t) {
   return SLEEF_RVV_DP_VREINTERPRET_VM(SLEEF_RVV_DP_VGET_VD(t, 0));
 }
 static INLINE vdouble tdxgetd3x_vd_tdx(tdx t) {
@@ -1225,7 +1166,7 @@ static INLINE vdouble tdxgetd3y_vd_tdx(tdx t) {
 static INLINE vdouble tdxgetd3z_vd_tdx(tdx t) {
   return SLEEF_RVV_DP_VGET_VD(t, 3);
 }
-static INLINE tdx tdxsete_tdx_tdx_vm(tdx t, rvv_dp_vmask e) {
+static INLINE tdx tdxsete_tdx_tdx_vm(tdx t, vmask e) {
   return __riscv_vset(t, 0, SLEEF_RVV_DP_VREINTERPRET_VD(e));
 }
 static INLINE tdx tdxsetx_tdx_tdx_vd(tdx t, vdouble x) {
@@ -1252,16 +1193,12 @@ static INLINE tdx tdxsetd3_tdx_tdx_vd3(tdx t, vdouble3 d3) {
   return tdxsetxyz_tdx_tdx_vd_vd_vd(t, vd3getx_vd_vd3(d3), vd3gety_vd_vd3(d3), vd3getz_vd_vd3(d3));
 }
 
-static INLINE tdx tdxseted3_tdx_vm_vd3(rvv_dp_vmask e, vdouble3 d3) {
+static INLINE tdx tdxseted3_tdx_vm_vd3(vmask e, vdouble3 d3) {
   return SLEEF_RVV_DP_VCREATE_TD(SLEEF_RVV_DP_VREINTERPRET_VD(e),
             vd3getx_vd_vd3(d3), vd3gety_vd_vd3(d3), vd3getz_vd_vd3(d3));
 }
-static INLINE tdx tdxsetexyz_tdx_vm_vd_vd_vd(rvv_dp_vmask e, vdouble x, vdouble y, vdouble z) {
+static INLINE tdx tdxsetexyz_tdx_vm_vd_vd_vd(vmask e, vdouble x, vdouble y, vdouble z) {
   return SLEEF_RVV_DP_VCREATE_TD(SLEEF_RVV_DP_VREINTERPRET_VD(e), x, y, z);
-}
-static INLINE vdouble vmlanp_vd_vd_vd_vd(vdouble x, vdouble y, vdouble z) {
-  // z - x * y;
-  return __riscv_vfnmsac(z, x, y, VECTLENDP);
 }
 
 static INLINE vdouble tdigetx_vd_tdi(tdi_t d) {
@@ -1313,16 +1250,16 @@ static INLINE tdi_t tdisettdi_tdi_vd3_vi(vdouble3 v, vint i) {
 static INLINE rvv_dp_vopmask vcast_vo_i(int i) {
   return SLEEF_RVV_DP_VREINTERPRET_VOM(__riscv_vmv_v_x_u32m1(i, VECTLENSP));
 }
-static INLINE rvv_dp_vmask vreinterpret_vm_vi64(vint64 v)  {
+static INLINE vmask vreinterpret_vm_vi64(vint64 v)  {
   return SLEEF_RVV_DP_VREINTERPRET_VM(v);
 }
-static INLINE vint64 vreinterpret_vi64_vm(rvv_dp_vmask m)  {
+static INLINE vint64 vreinterpret_vi64_vm(vmask m)  {
   return SLEEF_RVV_DP_VREINTERPRET_VI64(m);
 }
-static INLINE rvv_dp_vmask vreinterpret_vm_vu64(vuint64 v) {
+static INLINE vmask vreinterpret_vm_vu64(vuint64 v) {
   return v;
 }
-static INLINE vuint64 vreinterpret_vu64_vm(rvv_dp_vmask m) {
+static INLINE vuint64 vreinterpret_vu64_vm(vmask m) {
   return m;
 }
 static INLINE int vtestallzeros_i_vo64(rvv_dp_vopmask g) {
@@ -1355,7 +1292,7 @@ static int vcast_i_vi2(vint2 v) {
 //
 
 static vquad loadu_vq_p(const int32_t *ptr) {
-    return SLEEF_RVV_SP_VREINTERPRET_VM(SLEEF_RVV_DP_VREINTERPRET_4VU(SLEEF_RVV_SP_LOAD_2VI(ptr, VECTLENSP * 2)));
+    return SLEEF_RVV_DP_VREINTERPRET_VQ(SLEEF_RVV_DP_VREINTERPRET_4VU(SLEEF_RVV_SP_LOAD_2VI(ptr, VECTLENSP * 2)));
 }
 
 static INLINE vquad cast_vq_aq(vargquad aq) { return aq; }
@@ -1364,23 +1301,16 @@ static INLINE vargquad cast_aq_vq(vquad vq) { return vq; }
 static INLINE void vprefetch_v_p(const void *ptr) {}
 
 
-// The public interface uses vmask and vopmask types, but on RVV these are not
-// compatible between SP and DP logic.  Functions that are affected by this
+// The public interface uses a vopmask type but on RVV this is not compatible
+// between SP and DP logic.  Functions that are affected by this
 // incompatibility have been split into two incompatible versions, above, and
 // the one matching the requested type is put back in place by the preprocessor
 // here:
 
 // Types and functions that conflict with ENABLE_RVV_DP
 #ifdef ENABLE_RVV_SP
-#define vmask rvv_sp_vmask
 #define vopmask rvv_sp_vopmask
 
-#define vcast_vm_i_i     rvv_sp_vcast_vm_i_i
-#define vcast_vi_vm      rvv_sp_vcast_vi_vm
-#define vand_vm_vm_vm    rvv_sp_vand_vm_vm_vm
-#define vor_vm_vm_vm     rvv_sp_vor_vm_vm_vm
-#define vxor_vm_vm_vm    rvv_sp_vxor_vm_vm_vm
-#define vandnot_vm_vm_vm rvv_sp_vandnot_vm_vm_vm
 #define vand_vo_vo_vo    rvv_sp_vand_vo_vo_vo
 #define vandnot_vo_vo_vo rvv_sp_vandnot_vo_vo_vo
 #define vor_vo_vo_vo     rvv_sp_vor_vo_vo_vo
@@ -1389,15 +1319,8 @@ static INLINE void vprefetch_v_p(const void *ptr) {}
 
 // Types and functions that conflict with ENABLE_RVV_SP
 #ifdef ENABLE_RVV_DP
-#define vmask rvv_dp_vmask
 #define vopmask rvv_dp_vopmask
 
-#define vcast_vm_i_i     rvv_dp_vcast_vm_i_i
-#define vcast_vi_vm      rvv_dp_vcast_vi_vm
-#define vand_vm_vm_vm    rvv_dp_vand_vm_vm_vm
-#define vor_vm_vm_vm     rvv_dp_vor_vm_vm_vm
-#define vxor_vm_vm_vm    rvv_dp_vxor_vm_vm_vm
-#define vandnot_vm_vm_vm rvv_dp_vandnot_vm_vm_vm
 #define vand_vo_vo_vo    rvv_dp_vand_vo_vo_vo
 #define vandnot_vo_vo_vo rvv_dp_vandnot_vo_vo_vo
 #define vor_vo_vo_vo     rvv_dp_vor_vo_vo_vo
